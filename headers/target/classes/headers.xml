@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:validation="http://www.mulesoft.org/schema/mule/validation"
+xmlns:http="http://www.mulesoft.org/schema/mule/http"
+xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="d2a6c877-44bd-49fb-82bb-f77705694614" >
+<http:listener-connection host="${http.Host}" port="${http.Port}" />
+</http:listener-config>
+<validation:config name="Validation_Config" doc:name="Validation Config" doc:id="76110c66-fddc-4481-9f23-5e7990590d93" />
+<http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="6c574b28-ccfc-4b83-bfea-09455a491d2e" >
+<http:request-connection host="localhost" port="8085" />
+</http:request-config>
+<http:listener-config name="HTTP_Listener_config1" doc:name="HTTP Listener config" doc:id="6f562aa8-5f61-41d1-89be-dff03fa4f0ff" >
+<http:listener-connection host="localhost" port="8085" />
+</http:listener-config>
+<configuration-properties doc:name="Configuration properties" doc:id="fa07d92f-03d2-4202-8b1c-2b025c181edd" file="Api2_Property.yaml" />
+	<http:listener-config name="HTTP_Listener_config2" doc:name="HTTP Listener config" doc:id="68478632-8353-49a3-a4ff-3eaeda4094af" >
+		<http:listener-connection host="localhost" port="8087" />
+	</http:listener-config>
+	<flow name="API1" doc:id="f58dc09d-aa50-494d-a3a2-50683c2b3646" >
+<http:listener doc:name="Listener" doc:id="312d152d-d056-4e7c-af68-afc2b69add1b" config-ref="HTTP_Listener_config1" path="/employee" allowedMethods="GET">
+<http:response >
+<http:headers ><![CDATA[#[output application/json
+---
+{
+"x-direction" : "Hdr_EmpMockResponse"
+}]]]></http:headers>
+</http:response>
+			<http:error-response>
+				<http:body ><![CDATA[#[output application/json 
+---
+payload]]]></http:body>
+			</http:error-response>
+
+</http:listener>
+<logger level="INFO" doc:name="Logger" doc:id="a5a016ac-7d92-42fb-baa5-0f6b1b0147b4" message="Flow 1 Header Value--&gt;#[message.attributes.headers.'x-direction']"/>  <!-- #[attributes.headers.'x'] -->
+		<validation:is-true doc:name="Is true" doc:id="683d792c-84e5-44f8-9473-c6986b12d958" expression="#[['Hdr_EmpRequest'] contains message.attributes.headers.'x-direction' ]" config-ref="Validation_Config" message="Header File is not correct please check once"/>
+		<ee:transform doc:name="Transform Message" doc:id="4656988d-41b1-4dc7-85d0-b461737a50d4" >
+<ee:message >
+<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"employee": [{
+		"name": "sonoo",
+		"salary": 56000,
+		"married": true
+	},
+	{
+		"name": "sonoo1",
+		"salary": 56123,
+		"married": false
+	}
+	]
+}]]></ee:set-payload>
+</ee:message>
+</ee:transform>
+
+</flow>
+	<flow name="API2" doc:id="651e2468-12f3-4ced-a674-9feac9a768b1" >
+<http:listener doc:name="Listener" doc:id="1cfc38b0-8bae-4e17-8b43-b71ef3790f64" config-ref="HTTP_Listener_config" path="/employeeofXMLVendor" allowedMethods="GET"/>
+<set-variable value="#[attributes.headers.'x-direction']" doc:name="Set Variable" doc:id="c47492a4-ec49-4fde-82b7-ad52df0748d3" variableName="header"/>
+<logger level="INFO" doc:name="Logger" doc:id="3968ba95-87e6-4338-a56a-a8ab8f65b087" message="Flow 2 Header Value--&gt; #[vars.header]"/>
+<http:request method="GET" doc:name="Request" doc:id="451268b7-6174-47c2-b7c5-50dc4dd4070b" config-ref="HTTP_Request_configuration" path="/employee">
+<http:headers><![CDATA[#[{
+"x-direction" : vars.header
+}]]]></http:headers>
+</http:request>
+<logger level="INFO" doc:name="Logger" doc:id="58610ab5-645c-4dfd-b78c-7fce4d568596" message="Payload Data-----&gt;#[payload]"/>
+<logger level="INFO" doc:name="Logger" doc:id="d68d102c-8bb7-49ff-b7af-8cde61b33814" message="#[message.attributes.headers.'x-direction']"/>
+<ee:transform doc:name="Transform Message" doc:id="95a182d2-b469-4892-bdbe-cae81a1b91c5" >
+<ee:message >
+<ee:set-payload ><![CDATA[%dw 2.0
+output application/xml
+---
+Employees:
+{(payload.employee map(employee,index)->{
+	Employee: employee mapObject(key,value)->{
+		(value): key
+	}
+})}]]></ee:set-payload>
+</ee:message>
+</ee:transform>
+
+
+
+
+</flow>
+
+       <flow name="API-3" doc:id="e9b94b8d-433a-47eb-a9b7-350994c72a96" >
+
+<http:listener doc:name="Listener" doc:id="7d21fd30-5b90-4a6e-bb27-a18304cf08ef" config-ref="HTTP_Listener_config2" path="/emp"/>
+		<set-variable value="#[attributes.headers.'x-direction']" doc:name="Set Variable" doc:id="05f380b1-feb3-44ad-b6e9-a7b1134c5ec2" variableName="header" />
+		<logger level="INFO" doc:name="Logger" doc:id="7cabd5f2-d675-450b-ba1e-c63d1f06d57e" message="Flow 2 Header Value--&gt; #[vars.header]"/>
+
+             <set-variable value="3" doc:name="Set Variable" doc:id="61113b4d-4727-4626-b1a7-d11578481762" variableName="SetRetryCount"/>
+
+             <http:request method="GET" doc:name="Request" doc:id="8506c4c9-9293-40c0-a286-16f39692361d" config-ref="HTTP_Request_configuration" path="/employee">
+
+<http:headers><![CDATA[#[{
+
+"x-direction" : vars.header
+
+}]]]></http:headers>
+
+</http:request>
+		<foreach doc:name="For Each" doc:id="00df1b5c-2f70-4787-9564-e90ba2fd8292" collection="#[['1','2','3']]" batchSize="3">
+			<!-- <set-variable value="1" doc:name="Set Variable" doc:id="4716b42a-d0d3-4e55-b059-63cabbae2221" variableName="var1"/>
+			<set-variable value="2" doc:name="Set Variable" doc:id="35c2aaa0-9955-477d-ae87-f74fdf8800a6" variableName="var2"/>
+			<set-variable value="3" doc:name="Set Variable" doc:id="acad7a82-bb39-4690-9d8b-b3454ef5c68a" variableName="var3"/> -->
+			<choice doc:name="Choice" doc:id="fdfa822d-6be9-4c0f-a840-6f1828fdfbbe" >
+				<when expression="#[payload == '1']">
+					<flow-ref doc:name="Flow Reference" doc:id="7c3e0213-e54c-4ce5-a61f-86852311bc88" name="API2"/>
+				</when>
+				<when expression="#[payload == '2']">
+					<flow-ref doc:name="Flow Reference" doc:id="d14b6d12-a099-4133-b6a4-8e79bb475f10" name="API2"/>
+				</when>
+				<when expression="#[payload == '3']">
+					<flow-ref doc:name="Flow Reference" doc:id="cc6f2058-5799-4d7f-bb17-9f6e856ab9c1" name="API2"/>
+				</when>
+				<otherwise >
+					<ee:transform doc:name="Transform Message" doc:id="dd5a3c96-ecf6-470c-9e2f-4aac0d577fd3" >
+						<ee:message >
+							<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"Massage" : "you are "
+}]]></ee:set-payload>
+						</ee:message>
+					</ee:transform>
+				</otherwise>
+			</choice>
+		
+		</foreach>
+
+
+</flow>
+
+</mule>
