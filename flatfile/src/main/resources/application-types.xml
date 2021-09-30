@@ -1,0 +1,26 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<types:mule xmlns:types="http://www.mulesoft.org/schema/mule/types">
+  <types:catalog>
+    <types:type name="flat" format="fixedWidth">
+      <types:shape format="fixedWidth" element="flat" location="flat.ffd" example="examples/dkp.ffd"/>
+    </types:type>
+    <types:type name="copy" format="java">
+      <types:shape format="raml"><![CDATA[#%RAML 1.0 DataType
+type: string]]></types:shape>
+    </types:type>
+  </types:catalog>
+  <types:enrichment select="#1ca84fa2-072c-4fe8-9c71-d871bda6dceb">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="flat"/>
+        </types:message>
+      </types:input-event>
+      <types:output-event>
+        <types:message>
+          <types:payload type="flat"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+</types:mule>

@@ -1,0 +1,7 @@
+form: FIXEDWIDTH
+id: 'flat'
+name: 'flat'
+values: 
+- { name: 'Id', usage: M, type: Integer, length: 1, format: { justify: LEFT } }
+- { name: 'ContactName', usage: M, type: String, length: 4 }
+- { name: 'Salary', usage: M, type: Decimal, length: 8, format: { implicit: 2, justify: LEFT } }

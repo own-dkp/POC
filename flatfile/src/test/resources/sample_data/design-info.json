@@ -1,0 +1,10 @@
+{
+  "sampleData": {
+    "f7b0f0e1-50fc-4f55-9fc5-84a9e068c519": {
+      "payload": "sample_data/unknown.dwl"
+    },
+    "2c8da0ea-6aee-48d0-98cb-f8156fb3f17d": {
+      "payload": "sample_data/employees.xml"
+    }
+  }
+}

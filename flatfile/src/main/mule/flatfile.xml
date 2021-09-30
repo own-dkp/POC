@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="ee9d7f7b-fe51-42dd-8d68-3e9258ff8331" >
+		<http:listener-connection host="0.0.0.0" port="8088" />
+	</http:listener-config>
+	<file:config name="File_Config" doc:name="File Config" doc:id="766c9c53-603e-4e91-91dd-fa2ec07846cb" />
+	<file:config name="File_Config1" doc:name="File Config" doc:id="f24ba3d3-7235-46c1-8cb5-ddd27c0ca3f8" />
+	<flow name="flatfileFlow" doc:id="6e3f405e-82c4-4e15-b48c-41aeb9ff61d5" >
+		<http:listener doc:name="Listener" doc:id="eaa84b8e-25a5-434d-99db-02c85c4f99a3" config-ref="HTTP_Listener_config" path="/flatfile" allowedMethods="POST"/>
+		<logger level="INFO" doc:name="Logger" doc:id="806170e7-20fc-4ecc-a7c3-e045df084a02" message='"Process is Started"'/>
+		<ee:transform doc:name="JSON to Flatfile Conversion" doc:id="1ca84fa2-072c-4fe8-9c71-d871bda6dceb" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/flatfile schemaPath = "flat.ffd"
+---
+payload map(key,value)->
+{
+	Id: key.Id,
+	ContactName: key.ContactName,
+	Salary: key.Salary
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<file:write doc:name="Write" doc:id="db167f2d-e170-4378-b288-ae5b4c3fbc6b" config-ref="File_Config1" path="C:\Users\DKP\Desktop\dkpff2.csv"/>
+		<set-variable value="#[payload]" doc:name="Set Variable" doc:id="0abf014d-a7d9-49ff-88f2-7556f9acf30a" variableName="flatfile"/>
+		<logger level="INFO" doc:name="Logger" doc:id="1cbd703c-505e-430e-81e6-433805bb6b57" message="#[payload]---------------------------&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;Json to Flafile-------&gt;&gt;#[vars.flatfile]" />
+		<ee:transform doc:name="Flatfile to JSON  Conversion" doc:id="e77d1d76-1552-4d0c-9004-c35ab62c0f2e" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload map(key,value)->
+{
+	Id: key.Id,
+	ContactName: key.ContactName,
+	Salary: key.Salary
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<set-variable value="#[payload]" doc:name="Set Variable" doc:id="ad77de8e-cf67-49ae-9b13-3622fa8e88fc" variableName="fToj"/>
+		<logger level="INFO" doc:name="Logger" doc:id="15197b25-6506-4715-94fc-5c0837ccd278" message="Flat To JSON----------------------&gt;&gt;#[payload]"/>
+		<ee:transform doc:name="Transform Message" doc:id="da1f904f-472c-40e7-afb8-2e21c7d570fd" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/xml
+---
+{
+	employees:{
+		employee:(payload)
+		}
+	
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<set-variable value="#[payload]" doc:name="Set Variable" doc:id="2cdd462e-1e99-4a37-94b3-6e7c8d50821a" variableName="xml"/>
+		<logger level="INFO" doc:name="Logger" doc:id="74903a30-dac0-420c-8d57-e506df1f4db3" message='"After Transformation into FLAT FILE"--------------&gt; #[vars.xml] '/>
+		<logger level="INFO" doc:name="Logger" doc:id="6baf7694-17bd-4480-87e0-189de5e63c2e" message='"Ending of the conversion"'/>
+
+	</flow>
+ </mule>
