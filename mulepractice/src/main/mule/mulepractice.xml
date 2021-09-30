@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:validation="http://www.mulesoft.org/schema/mule/validation" xmlns:file="http://www.mulesoft.org/schema/mule/file"
+	xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:jms="http://www.mulesoft.org/schema/mule/jms" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/current/mule-jms.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd
+http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="d605e3de-5806-49e0-93e3-1cc791edc2c9" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<db:config name="Database_Config" doc:name="Database Config" doc:id="baa9cc2b-1c86-4dd8-9fb3-7226d29586a6" >
+		<db:my-sql-connection host="localhost" port="3306" user="root" password="root" database="dkp" />
+	</db:config>
+	<file:config name="File_Config" doc:name="File Config" doc:id="87cd0a1b-4479-4f7d-9b16-6e503a669d7e" >
+		<file:connection workingDir="D:\" />
+	</file:config>
+	<validation:config name="Validation_for_empno" doc:name="Validation Config" doc:id="3040daa6-4489-4851-9b61-9437ccbb618a" />
+	<flow name="DB_Connection_Flow" doc:id="0653e331-1cfe-4c75-865b-233a7e577863" >
+		<ee:transform doc:name="Transform Message" doc:id="ac69703e-7ed6-4d30-b4dc-040011a261d2">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload map(key,value)->
+{
+"empno": key.empno,
+"ename": key.empname,
+"job": key.job,
+"dept": key.dept
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<validation:is-number doc:name="Is number" doc:id="29fda75e-d176-4d4c-b98e-0a9d93c2eeae" config-ref="Validation_for_empno" value='#["payload.empno"]' numberType="INTEGER"/>
+		<db:bulk-insert doc:name="Bulk insert" doc:id="dac20086-df1f-40e7-a4f1-0dc14f02d4c6" config-ref="Database_Config">
+			<db:sql>insert into employee (empno,ename,job,dept) values (:empno,:ename,:job,:dept)</db:sql>
+		</db:bulk-insert>
+	</flow>
+	<flow name="PublishingData" doc:id="fefb131d-e904-4746-b5f2-9c6a76a301c9" >
+		<http:listener doc:name="Listener" doc:id="0b255472-742e-43a4-b1a5-f42d1e667c88" config-ref="HTTP_Listener_config" path="/mule" allowedMethods="POST" outputMimeType="application/json">
+			<http:error-response statusCode="#[vars.statuscode]" reasonPhrase="#[vars.phrase]" >
+				<http:body ><![CDATA[#[payload]]]></http:body>
+			</http:error-response>
+		</http:listener>
+		<flow-ref doc:name="Flow Reference" doc:id="2d8f39c1-41da-4082-967e-5591ec91b343" name="DB_Connection_Flow" />
+	</flow>
+	
+</mule>
