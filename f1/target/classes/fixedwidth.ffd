@@ -1,0 +1,11 @@
+form: FIXEDWIDTH
+id: 'fixedwidth'
+name: 'fixedwidth'
+values: 
+- { name: 'Name', usage: M, type: String, length: 10 }
+- { name: 'Address', usage: M, type: String, length: 10 }
+- { name: 'Phone', usage: M, type: Integer, length: 10 }
+- { name: 'Admin', usage: M, type: String, length: 10 }
+- { name: 'DoctorName', usage: M, type: String, length: 10 }
+- { name: 'HospitalAddress', usage: M, type: String, length: 10 }
+- { name: 'HospitalNumber', usage: M, type: String, length: 10 }

@@ -1,0 +1,47 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<types:mule xmlns:types="http://www.mulesoft.org/schema/mule/types">
+  <types:catalog>
+    <types:type name="fixedwidth" format="fixedWidth">
+      <types:shape format="fixedWidth" element="fixedwidth" location="fixedwidth.ffd"/>
+    </types:type>
+    <types:type name="json" format="json">
+      <types:shape format="weave" example="examples/Hospital.json"><![CDATA[%dw 2.0
+
+type json = Array<{|  Name: String,   Address: String,   "Phone-Number": String,   Admin: String,   "Doctor Name": String,   "Hospital Address": String,   H_Number: String,   H_Admin: String|}> {"example": "[{\\\"Name\\\":\\\"Name\\\",\\\"Address\\\":\\\"Address\\\",\\\"Phone-Number\\\":\\\"Phone-Number\\\",\\\"Admin\\\":\\\"Admin\\\",\\\"Doctor Name\\\":\\\"Hospital_Name\\\",\\\"Hospital Address\\\":\\\"Hospital_Address\\\",\\\"H_Number\\\":\\\"Number\\\",\\\"H_Admin\\\":\\\"Hospital_Admin\\\"},{\\\"Name\\\":\\\"Name\\\",\\\"Address\\\":\\\"Address\\\",\\\"Phone-Number\\\":\\\"Phone-Number\\\",\\\"Admin\\\":\\\"Admin\\\",\\\"Doctor Name\\\":\\\"Hospital_Name\\\",\\\"Hospital Address\\\":\\\"Hospital_Address\\\",\\\"H_Number\\\":\\\"Number\\\",\\\"H_Admin\\\":\\\"Hospital_Admin\\\"}]"}
+
+]]></types:shape>
+    </types:type>
+  </types:catalog>
+  <types:enrichment select="#f1463490-db68-408c-909b-b9ed0d7b8747">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="fixedwidth"/>
+        </types:message>
+      </types:input-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#5911b988-0eb3-4597-a98d-9afbb0729af3">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="fixedwidth"/>
+        </types:message>
+      </types:input-event>
+      <types:output-event>
+        <types:message>
+          <types:payload type="json"/>
+        </types:message>
+      </types:output-event>
+    </types:processor-declaration>
+  </types:enrichment>
+  <types:enrichment select="#79e5ad93-413e-4710-ae29-11d85a35eb37">
+    <types:processor-declaration>
+      <types:input-event>
+        <types:message>
+          <types:payload type="fixedwidth"/>
+        </types:message>
+      </types:input-event>
+    </types:processor-declaration>
+  </types:enrichment>
+</types:mule>

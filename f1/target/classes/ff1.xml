@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd 
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd">
+	
+	
+	
+	
+	
+	
+	
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="898ec76d-03c1-411b-872b-ee7ff41e20e1" >
+<http:listener-connection host="0.0.0.0" port="8089" />
+</http:listener-config>
+	<flow name="hospital-flatfileFlow1" doc:id="04f29963-58c7-4997-ad79-bff6a8d0dad5" >
+<http:listener doc:name="Listener" doc:id="7d0d3bdd-5c41-477e-b8ba-dc8a5c52061f" config-ref="HTTP_Listener_config" path="/ff" allowedMethods="POST" outputMimeType="application/flatfile; schemapath=fixedwidth.ffd"/>
+<ee:transform doc:name="Transform Message" doc:id="79e5ad93-413e-4710-ae29-11d85a35eb37" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/flatfile schemaPath="fixedwidth.ffd"
+---
+payload map ( payload01 , indexOfPayload01 ) -> {
+	Name: payload01.Name,
+	Address: payload01.Address,
+	"Phone-Number": payload01.Phone as String,
+	Admin: payload01.Admin,
+	"Doctor Name": payload01.DoctorName,
+	"Hospital Address": payload01.HospitalAddress,
+	H_Number: payload01.HospitalNumber
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="08ef1212-a09f-454d-8571-b8fd6b729689" message="#[message.payload]" />
+		<!-- <ee:transform doc:name="Transform Message" doc:id="5911b988-0eb3-4597-a98d-9afbb0729af3" >
+<ee:message >
+<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+-&#45;&#45;
+payload map ( payload01 , indexOfPayload01 ) -> {
+	Name: payload01.Name,
+	Address: payload01.Address,
+	"Phone-Number": payload01.Phone as String,
+	Admin: payload01.Admin,
+	"Doctor Name": payload01.DoctorName,
+	"Hospital Address": payload01.HospitalAddress,
+	H_Number: payload01.HospitalNumber
+}]]></ee:set-payload>
+</ee:message>
+</ee:transform> -->
+
+</flow>
+
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+</mule>
