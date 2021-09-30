@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:sockets="http://www.mulesoft.org/schema/mule/sockets" xmlns:email="http://www.mulesoft.org/schema/mule/email"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/email http://www.mulesoft.org/schema/mule/email/current/mule-email.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/sockets http://www.mulesoft.org/schema/mule/sockets/current/mule-sockets.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<email:smtp-config name="Email_SMTP" doc:name="Email SMTP" doc:id="5ff1046b-9093-4d0f-a7c8-b35471a47810" >
+		<email:smtp-connection host="smtp.gmail.com" user="dpdharmendra1@gmail.com" password="Dkpsrknnbpc7#" port="587">
+			<email:properties >
+				<email:property key="mail.smtp.starttls.enable" value="true" />
+			</email:properties>
+		</email:smtp-connection>
+	</email:smtp-config>
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="236da887-876c-40b7-86da-b337a89de89d" >
+		<http:listener-connection host="0.0.0.0" port="8091" />
+	</http:listener-config>
+	<flow name="sending-emailFlow" doc:id="51b04420-655c-48c6-a8b9-9862b4b974ec" >
+		<http:listener doc:name="Listener" doc:id="08dfec04-d2c4-4dd2-ac88-d9a42b40cd21" config-ref="HTTP_Listener_config" path="/sending-email"/>
+		<email:send doc:name="Send" doc:id="9a3cbe67-d270-488b-9f2d-d5bc58dd7ecf" config-ref="Email_SMTP" fromAddress="dpdharmendra1@gmail.com" subject="Mail From AnypointStudio">
+			<email:to-addresses >
+				<email:to-address value="dpdharmendra1@gmail.com" />
+			</email:to-addresses>
+			<email:body>
+				<email:content ><![CDATA[#['CSV Attached']]]></email:content>
+			</email:body>
+			<email:attachments ><![CDATA[#[payload]]]></email:attachments>
+		
+</email:send>
+		<ee:transform doc:name="Transform Message" doc:id="3818d819-5457-4312-8873-e900696ddcd3" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{"message":"Successfully send"}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	
+	
+</flow>
+</mule>
