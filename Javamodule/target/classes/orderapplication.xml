@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:java="http://www.mulesoft.org/schema/mule/java"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/java http://www.mulesoft.org/schema/mule/java/current/mule-java.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="3fd1059e-0b4b-49c3-b324-fdff2a997711" basePath="/">
+		<http:listener-connection host="0.0.0.0" port="8096" />
+	</http:listener-config>
+	<flow name="orderapplicationFlow" doc:id="45821b9b-0579-41fa-aebf-fec20efd6b13" >
+		<http:listener doc:name="Listener" doc:id="c5e0d062-6748-4471-b0b4-9beadd640e98" config-ref="HTTP_Listener_config" path="/path"/>
+		<java:invoke-static doc:name="Invoke static" doc:id="f9a1e9e0-8e45-444f-af95-947b854d61e0" class="com.way2learnonline.StockQuoteService" method="sayHello(String,String)">
+			<java:args ><![CDATA[#[%dw 2.0
+output application/java
+---
+{
+	arg0: attributes.queryParams.name as String,
+	arg1: attributes.queryParams.city as String
+}]]]></java:args>
+		</java:invoke-static>
+	</flow>
+	<flow name="orderapplicationFlow1" doc:id="aaaf30fc-970a-48e8-b77a-12b2219ff388" >
+		<http:listener doc:name="Listener" doc:id="e9d897b1-daf4-4905-a04b-8ec0079ad43e" config-ref="HTTP_Listener_config" path="/javamethod"/>
+		<java:new doc:name="New" doc:id="243b8324-5eb1-415f-adde-8a51dadd82a7" class="com.way2learnonline.StockQuoteService" constructor="StockQuoteService()" target="sqs"/>
+		<java:invoke doc:name="Invoke" doc:id="a64098b1-1445-48d6-8673-95451fed93f2" class="com.way2learnonline.StockQuoteService" method="getStockPrice(String)" instance="#[vars.sqs]">
+			<java:args ><![CDATA[#[%dw 2.0
+output application/java
+---
+{
+	arg0: attributes.queryParams.stock as String
+}]]]></java:args>
+		</java:invoke>
+	</flow>
+</mule>
