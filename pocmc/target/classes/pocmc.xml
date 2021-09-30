@@ -1,0 +1,496 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+ 
+
+<mule xmlns:batch="http://www.mulesoft.org/schema/mule/batch"
+
+       xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+
+xmlns:validation="http://www.mulesoft.org/schema/mule/validation"
+
+       xmlns:http="http://www.mulesoft.org/schema/mule/http"
+
+       xmlns="http://www.mulesoft.org/schema/mule/core"
+
+   xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+
+http://www.mulesoft.org/schema/mule/validation http://www.mulesoft.org/schema/mule/validation/current/mule-validation.xsd
+
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+
+http://www.mulesoft.org/schema/mule/batch http://www.mulesoft.org/schema/mule/batch/current/mule-batch.xsd">
+
+       <http:listener-config name="HTTP_Listener_config_1"
+
+             doc:name="HTTP Listener config"
+
+             doc:id="90cf4146-2bea-418e-b110-a53a970e2c31">
+
+             <http:listener-connection
+
+                    host="${http.host1}" port="${http.port1}" />
+
+       </http:listener-config>
+
+       <validation:config name="Validation_Config"
+
+             doc:name="Validation Config"
+
+             doc:id="ddbc59a3-27e7-4914-b84f-6027762d31ae" />
+
+       <http:request-config
+
+             name="HTTP_Request_configuration"
+
+             doc:name="HTTP Request configuration"
+
+             doc:id="c038f0c3-0024-4b1f-944e-6ea349c5ae0f">
+
+             <http:request-connection host="${http.host1}"
+
+                    port="${http.port1}" />
+
+       </http:request-config>
+
+       <!-- <configuration-properties doc:name="Configuration properties" doc:id="8cbcb7be-25ee-4d29-8de0-8c2dbf42e33b"
+
+             file="empproperties.yaml" /> <configuration-properties doc:name="Configuration
+
+             properties" doc:id="4bedbee7-df70-40dc-98b3-f29fdf02f7e6" file="emp2properties.yaml"
+
+             /> -->
+
+       <http:listener-config name="HTTP_Listener_config_2"
+
+             doc:name="HTTP Listener config"
+
+             doc:id="959ff837-feef-45af-b697-7ad12c7a147c">
+
+             <http:listener-connection
+
+                    host="${http.host2}" port="${http.port2}" />
+
+       </http:listener-config>
+
+       <http:listener-config name="HTTP_Listener_config_3"
+
+             doc:name="HTTP Listener config"
+
+             doc:id="3346a881-d2bc-4648-a24e-8813c1621334">
+
+             <http:listener-connection host="${http.host3}" port="${http.port3}" />
+
+       </http:listener-config>
+
+       <http:request-config name="HTTP_Request_configuration1" doc:name="HTTP Request configuration" doc:id="c14c840d-de76-45b3-aa9d-5152cefb979b" >
+
+             <http:request-connection host="${http.host3}" port="${http.port3}" />
+
+       </http:request-config>
+
+       <flow name="API1" doc:id="cd828ed3-9b1e-44e4-824f-a9fa20e1a0a6" >
+
+<http:listener doc:name="Listener" doc:id="13353958-3e29-4c0f-a06f-eff4532ee91b" path="/employee" allowedMethods="GET" config-ref="HTTP_Listener_config_1">
+
+<http:response >
+
+<http:headers ><![CDATA[#[output application/json
+
+---
+
+{
+
+"x-direction" : "Hdr_EmpMockResponse"
+
+}]]]></http:headers>
+
+</http:response>
+
+</http:listener>
+
+<logger level="INFO" doc:name="Logger" doc:id="3b613f19-34c4-4f7c-8838-e1ff6b2dfa18" message="Flow 1 Header Value--&gt;#[message.attributes.headers.'x-direction']"/>  <!-- #[attributes.headers.'x'] -->
+
+<validation:is-true doc:name="Is true" doc:id="41313a1d-9019-4a9c-b113-0de9c76a3642" expression="#[['Hdr_EmpRequest'] contains message.attributes.headers.'x-direction' ]" message="500 - Internal Server Error" config-ref="Validation_Config"/>
+
+<ee:transform doc:name="Transform Message" doc:id="3dfb80ea-35cb-497d-b25c-7191f7da06a1" >
+
+<ee:message >
+
+<ee:set-payload ><![CDATA[%dw 2.0
+
+output application/json
+
+---
+
+{
+
+       "Employees": [
+
+             {
+
+                    "userId": "rirani",
+
+                    "jobTitleName": "Developer",
+
+                    "firstName": "Romin",
+
+                    "lastName": "Irani",
+
+                    "preferredFullName": "Romin Irani",
+
+                    "employeeCode": "E1",
+
+                    "region": "CA",
+
+                    "phoneNumber": "408-1234567",
+
+                    "emailAddress": "romin.k.irani@gmail.com"
+
+             },
+
+             {
+
+                    "userId": "nirani",
+
+                    "jobTitleName": "Developer",
+
+                    "firstName": "Neil",
+
+                    "lastName": "Irani",
+
+                    "preferredFullName": "Neil Irani",
+
+                    "employeeCode": "E2",
+
+                    "region": "CA",
+
+                    "phoneNumber": "408-1111111",
+
+                    "emailAddress": "neilrirani@gmail.com"
+
+             },
+
+             {
+
+                    "userId": "thanks",
+
+                    "jobTitleName": "Program Directory",
+
+                    "firstName": "Tom",
+
+                    "lastName": "Hanks",
+
+                    "preferredFullName": "Tom Hanks",
+
+                    "employeeCode": "E3",
+
+                    "region": "CA",
+
+                    "phoneNumber": "408-2222222",
+
+                    "emailAddress": "tomhanks@gmail.com"
+
+             }
+
+       ]
+
+}]]></ee:set-payload>
+
+</ee:message>
+
+</ee:transform>
+
+ 
+
+</flow>
+
+       <flow name="API2" doc:id="3b9d4be1-00c2-4ceb-9b4f-9ebfb07290a6" >
+
+<http:listener doc:name="Listener" doc:id="5ca82496-16de-483f-9695-3b92959789df" config-ref="HTTP_Listener_config_2" path="/employeeforXMLVendor">
+
+                    <http:response >
+
+                          <http:headers ><![CDATA[#[output application/json
+
+---
+
+{
+
+"x-direction" : "Hdr_EmpFinalResponse"
+
+}]]]></http:headers>
+
+                    </http:response>
+
+             </http:listener>
+
+             <set-variable value="#[attributes.headers.'x-direction']" doc:name="Set Variable" doc:id="b01aa009-13a0-4e16-8a85-d5ba04708f97" variableName="header"/>
+
+<logger level="INFO" doc:name="Logger" doc:id="308c8783-d6b8-42c9-bebb-c665879e905b" message="Flow 2 Header Value--&gt; #[vars.header]"/>
+
+<http:request method="GET" doc:name="Request" doc:id="2be2a616-ea3d-4664-811a-93a5ad7bbc93" config-ref="HTTP_Request_configuration" path="/employee">
+
+<http:headers ><![CDATA[#[{
+
+"x-direction" : vars.header
+
+}]]]></http:headers>
+
+</http:request>
+
+<logger level="INFO" doc:name="Logger" doc:id="12cc6da8-81a7-434b-81fc-827e1080da03" message="After API-1"/>
+
+             <ee:transform doc:name="Transform Message" doc:id="593a7a89-ef6f-41b2-b916-161ec6022c74" >
+
+<ee:message >
+
+<ee:set-payload ><![CDATA[%dw 2.0
+
+output application/xml
+
+---
+
+Employees: {
+
+       (payload.Employees map ( employee , indexOfEmployee ) -> {
+
+             Employee: employee mapObject (value,key) -> {
+
+                    (key): value
+
+             }
+
+       })
+
+}
+
+]]></ee:set-payload>
+
+</ee:message>
+
+</ee:transform>
+
+</flow>
+
+       <flow name="API-3" doc:id="934048b7-a4cd-44db-817b-fac7332ffd3a" >
+
+       <http:listener doc:name="Listener" doc:id="e4fbaa2c-70b7-4ae3-bc3a-f219c2593231" config-ref="HTTP_Listener_config_3" path="/employeemultiple">
+
+                    <http:response >
+
+                          <http:headers ><![CDATA[#[output application/json
+
+---
+
+{
+
+"x-direction" : "Hdr_EmpFinalResponse"
+
+}]]]></http:headers>
+
+                    </http:response>
+
+             </http:listener>
+
+             <set-variable value="#[attributes.headers.'x-direction']" doc:name="Set Variable" doc:id="a7a2db07-522f-48e7-918f-b6413762b63c" variableName="header"/>
+
+<logger level="INFO" doc:name="Logger" doc:id="48b0628a-880d-4703-9eb1-0e849ef7b03b" message="Flow 2 Header Value--&gt; #[vars.header]"/>
+
+<http:request method="GET" doc:name="Request" doc:id="cf14fb7c-80c9-47be-b942-5890479d478a" config-ref="HTTP_Request_configuration" path="/employee">
+
+<http:headers ><![CDATA[#[{
+
+"x-direction" : vars.header
+
+}]]]></http:headers>
+
+</http:request>
+
+<set-variable value="#[(vars.retryCount default 0) +1]" doc:name="Set Variable" doc:id="649caa26-6b9c-42f5-bf90-448acc7bb758" variableName="SetRetryCount"/>
+
+             <choice doc:name="Choice" doc:id="2a13d697-4045-4fa6-beec-c570f9fcb9fb" >
+
+                    <when expression="#[(vars.retryCount as Number default 0) &lt;= 3]">
+
+                          <ee:transform doc:name="Transform Message" doc:id="912711dc-90f6-4798-9e91-b6f5629ccc59">
+
+<ee:message>
+
+<ee:set-payload><![CDATA[%dw 2.0
+
+output application/xml
+
+---
+
+Employees: {
+
+       (payload.Employees map ( employee , indexOfEmployee ) -> {
+
+             Employee: employee mapObject (value,key) -> {
+
+                    (key): value
+
+             }
+
+       })
+
+}
+
+]]></ee:set-payload>
+
+</ee:message>
+
+</ee:transform>
+
+                    </when>
+
+                    <otherwise >
+
+                          <logger level="INFO" doc:name="Logger" doc:id="a14ca9bd-7e1c-43e3-8a28-c1a66717d688" message="Maximum count exceeded"/>
+
+                    </otherwise>
+
+             </choice>
+
+             <flow-ref doc:name="Flow Reference" doc:id="faa08759-6b89-4e8d-93ed-23bda51990e9" name="API-3" />
+
+      
+
+</flow>
+
+</flow>
+
+       <flow name="API-3" doc:id="61b89902-4618-407f-8623-f1ddbe4958df" >
+
+       <http:listener doc:name="Listener" doc:id="97910082-f1fa-4e38-980c-cfaebc078504" config-ref="HTTP_Listener_config_3" path="/employeemultiple">
+
+                    <http:response >
+
+                          <http:headers ><![CDATA[#[output application/json
+
+---
+
+{
+
+"x-direction" : "Hdr_EmpFinalResponse"
+
+}]]]></http:headers>
+
+                    </http:response>
+
+             </http:listener>
+
+<set-variable value="#[attributes.headers.'x-direction']" doc:name="Set Variable" doc:id="960587be-9f7e-40d6-bc50-b869504f1bee" variableName="header" />
+
+             <logger level="INFO" doc:name="Logger" doc:id="8112b470-d00a-4210-99bb-09d4f1b89923" message="Flow 2 Header Value--&gt; #[vars.header]"/>
+
+             <set-variable value="#[vars.retryCount]" doc:name="Set Variable" doc:id="fe0d3c1f-71a7-44d7-b19c-d5c9683b8aa7" variableName="SetRetryCount"/>
+
+             <http:request method="GET" doc:name="Request" doc:id="9a4b90a1-8138-483b-9571-6f281d59650e" config-ref="HTTP_Request_configuration" path="/employee">
+
+<http:headers><![CDATA[#[{
+
+"x-direction" : vars.header
+
+}]]]></http:headers>
+
+</http:request>
+
+             <set-variable doc:name="Set Variable" doc:id="0906042e-1b35-4170-8336-612693a31293" variableName="Increment Counter" value="#[(vars.retryCount default 0) +1]" />
+
+             <flow-ref doc:name="Flow Reference" doc:id="0ff8db10-b294-4590-b71b-8951dbf1aefa" name="API-4"/>
+
+</flow>
+
+       <flow name="API-4" doc:id="2a5a86ca-5117-400d-b364-7f9e363c57ea" >
+
+             <http:request method="GET" doc:name="Request" doc:id="905e7a93-bdab-48c2-b43e-06c3062f0bde" config-ref="HTTP_Request_configuration1" path="/employeemultiple"/>
+
+             <choice doc:name="Choice" doc:id="189aff47-b5d2-4b54-ab84-cc3c4ab4b3fc" >
+
+                    <when expression="#[(vars.retryCount as Number default 0) &lt; 3]">
+
+                          <flow-ref doc:name="Flow Reference" doc:id="ee28715c-3a99-4ba3-83ad-93c56bc73814" name="API-4" />
+
+                    </when>
+
+                    <otherwise >
+
+                          <logger level="INFO" doc:name="Logger" doc:id="1351b214-e167-42e3-bd41-f7a3eb3fa67a" message="MAx Count complted"/>
+
+                    </otherwise>
+
+             </choice>
+
+       </flow>
+       
+       </flow>
+
+       <flow name="API-3" doc:id="ea7120e2-5564-4ed1-8625-93dc84bee4e9" >
+
+       <http:listener doc:name="Listener" doc:id="32864dc7-2bab-4bac-a1b9-471b04361e44" config-ref="HTTP_Listener_config_3" path="/employeemultiple">
+
+                    <http:response >
+
+                          <http:headers ><![CDATA[#[output application/json
+
+---
+
+{
+
+"x-direction" : "Hdr_EmpFinalResponse"
+
+}]]]></http:headers>
+
+                    </http:response>
+
+             </http:listener>
+
+<set-variable value="#[attributes.headers.'x-direction']" doc:name="Set Variable" doc:id="88c3b2b1-bc15-4231-9a30-88bf9950ce2f" variableName="header" />
+
+             <logger level="INFO" doc:name="Logger" doc:id="081780a7-3c03-4d87-98ab-82d92c815770" message="Flow 2 Header Value--&gt; #[vars.header]"/>
+
+             <set-variable value="#[vars.retryCount]" doc:name="Set Variable" doc:id="5ff68a1d-3009-4a82-b7cb-2176708a0a0f" variableName="SetRetryCount"/>
+
+             <http:request method="GET" doc:name="Request" doc:id="8b377bbe-23dd-4c92-b309-37df9606b530" config-ref="HTTP_Request_configuration" path="/employee">
+
+<http:headers><![CDATA[#[{
+
+"x-direction" : vars.header
+
+}]]]></http:headers>
+
+</http:request>
+
+             <flow-ref doc:name="Flow Reference" doc:id="70916e61-028f-4ef8-a944-11b8be4c9f16" name="API-4"/>
+
+</flow>
+
+       <flow name="API-4" doc:id="c241199f-5616-4aca-a5fd-be55919d37b3" >
+
+             <http:request method="GET" doc:name="Request" doc:id="d6b4188e-2a41-4700-b468-c64183854b05" config-ref="HTTP_Request_configuration1" path="/employeemultiple"/>
+
+             <choice doc:name="Choice" doc:id="7d769463-6661-45b5-a158-974a84a6dcef" >
+
+                    <when expression="#[payload.id as Number]">
+
+                          <set-variable value="#[(vars.retryCount default 0) +1]" doc:name="Set Variable" doc:id="9b2036da-516c-46d2-a0cf-bf4961162b00" variableName="Counter" />
+
+                          <flow-ref doc:name="Flow Reference" doc:id="2110c4ac-5fd3-45bd-8821-1ec8e40331cc" name="API-3" />
+
+                    </when>
+
+                    <otherwise >
+
+                          <logger level="INFO" doc:name="Logger" doc:id="5b191159-5488-48c2-9512-0e5cac44265e" message="After Repetion"/>
+
+                    </otherwise>
+
+             </choice>
+
+       </flow>
+       </mule>
